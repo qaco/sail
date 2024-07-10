@@ -73,6 +73,12 @@ http://www.cl.cam.ac.uk/~pes20/sail/.
     (libsail (= :version))))
 
 (package
+  (name sail_xdsl_backend)
+  (synopsis "Sail to XDSL translation")
+  (depends
+    (libsail (= :version))))
+
+(package
   (name sail_smt_backend)
   (synopsis "Sail to C translation")
   (depends

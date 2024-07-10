@@ -1,0 +1,12 @@
+(executable
+ (name sail_plugin_xdsl)
+ (modes
+  (native plugin))
+ (libraries libsail))
+
+(install
+ (section
+  (site
+   (libsail plugins)))
+ (package sail_xdsl_backend)
+ (files sail_plugin_xdsl.cmxs))
