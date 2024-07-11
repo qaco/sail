@@ -93,7 +93,7 @@ let process_def_aux env output_chan def_aux = match def_aux with
   | DEF_register(DEC_aux(DEC_reg(reg,id,opt),_)) ->
      let string_id = string_of_id id in
      let string_register_definition = process_dec_spec env output reg in
-     "register " ^ string_id ^ ": " ^ string_register_definition ^ "\n"
+     "register " ^ string_id ^ ": " ^ string_register_definition
   | DEF_pragma(string0,string1,int) -> ""
   (* | DEF_private(def) -> "" *)
   (* | DEF_attribute(string,attribute_data,option_def) -> "" *)
