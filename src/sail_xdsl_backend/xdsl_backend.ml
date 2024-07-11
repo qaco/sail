@@ -19,27 +19,59 @@ let string_of_id id = match id with
     Id_aux(Id(id),_) -> id
   | Id_aux(Operator(_),_) -> assert(false)
 
+let string_of_nexp_aux nexp_aux = match nexp_aux with
+    Nexp_id(id) -> assert(false)
+  | Nexp_var(kid) -> assert(false)
+  | Nexp_constant(num) -> Nat_big_num.to_string(num)
+  | Nexp_app(id,nexp_list) -> assert(false)
+  | Nexp_if(n_constraint,nexp0,nexp1) -> assert(false)
+  | Nexp_times(nexp0, nexp1) -> assert(false)
+  | Nexp_sum(nexp0,nexp1) -> assert(false)
+  | Nexp_minus(nexp0,nexp1) -> assert(false)
+  | Nexp_exp(nexp) -> assert(false)
+  | Nexp_neg(nexp) -> assert(false)
+
 let rec process_dec_spec env output (Typ_aux(reg,_)) = match reg with
     Typ_id(id) ->
      let sid = string_of_id id in
      sid
-  | Typ_var(kid) -> ""
+  | Typ_var(kid) -> assert(false)
   | Typ_app(id,typ_arg_list) ->
      let sid = string_of_id id in
      let string_typ_arg_list = List.map (process_typ_args env output) typ_arg_list in
      let h,t = List.hd string_typ_arg_list, List.tl string_typ_arg_list in
-     let string_typ_args = h ^ (List.fold_left (fun x acc -> acc^","^x) "" t) in
+     let string_typ_args = h ^ (List.fold_left (fun acc x -> acc^","^x) "" t) in
      sid ^ "(" ^ string_typ_args ^ ")"
-  | Typ_fn(id_in,typ_list) -> ""
-  | Typ_bidir(typ1,typ2) -> ""
-  | Typ_tuple(typ_list) -> ""
-  | Typ_exist(kinded_id_list,typ0,typ1) -> ""
-  | Typ_internal_unknown -> ""
+  | Typ_fn(id_in,typ_list) -> assert(false)
+  | Typ_bidir(typ1,typ2) -> assert(false)
+  | Typ_tuple(typ_list) -> assert(false)
+  | Typ_exist(kinded_id_list,typ0,typ1) -> assert(false)
+  | Typ_internal_unknown -> assert(false)
 and process_typ_args env output (A_aux (typ_arg_aux, _)) = match typ_arg_aux with
-    A_nexp _ -> ""
-  | A_typ typ -> process_dec_spec env output typ
-  | A_bool nc -> ""
-
+    A_nexp n ->
+     begin
+       match n with
+         Nexp_aux(nexp_aux0,nexp_aux1) -> string_of_nexp_aux nexp_aux0
+     end
+  | A_typ(t) -> process_dec_spec env output t
+  | A_bool(NC_aux(nca,_)) ->
+     begin
+       match nca with
+         NC_equal(nexp0,nexp1) -> assert(false)
+       | NC_bounded_ge(nexp0,nexp1) -> assert(false)
+       | NC_bounded_gt(nexp0,nexp1) -> assert(false)
+       | NC_bounded_le(nexp0,nexp1) -> assert(false)
+       | NC_bounded_lt(nexp0,nexp1) -> assert(false)
+       | NC_not_equal(nexp0,nexp1) -> assert(false)
+       | NC_set(nexp,num_list) -> assert(false)
+       | NC_or(n_constraint0, n_constraint1) -> assert(false)
+       | NC_and(n_constraint0,n_constraint1) -> assert(false)
+       | NC_app(id,typ_arg_list) -> assert(false)
+       | NC_id (id) -> assert(false)
+       | NC_var(kid) -> assert(false)
+       | NC_true -> assert(false)
+       | NC_false -> assert(false)
+     end
 
 let process_def_aux env output_chan def_aux = match def_aux with
     DEF_type(type_def) -> ""
