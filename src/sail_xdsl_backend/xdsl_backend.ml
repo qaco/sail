@@ -15,7 +15,7 @@ open Anf
 
 module Big_int = Nat_big_num
 
-let process_def_aux output_chan def_aux = match def_aux with
+let process_def_aux env output_chan def_aux = match def_aux with
     DEF_type(type_def) -> ()
   | DEF_constraint(atyp) -> ()
   | DEF_fundef(fundef) -> ()
@@ -38,18 +38,16 @@ let process_def_aux output_chan def_aux = match def_aux with
   (* | DEF_doc(string, def) -> () *)
   | DEF_internal_mutrec(fundef_list) -> ()
 
-let process_def output_chan def = match def with
-    DEF_aux(aux,annot) -> process_def_aux output_chan aux
-
-let rec process_def_list output_chan def_list = match def_list with
+let rec process_def_list env output_chan def_list = match def_list with
     [] -> ()
-  | h :: t -> process_def output_chan h ;
-              process_def_list output_chan t
+  | DEF_aux(aux,_) :: t -> process_def_aux env output_chan aux ;
+                           process_def_list env output_chan t
 
-(* ./src/lib/type_check.mli:type typed_ast = (tannot, env) ast *)
-let process_ast (output_chan: out_channel) (ast: typed_ast) =
+(* Env: ~/src/upstream/sail/src/lib/type_env.ml *)
+(* Ast: ./src/lib/type_check.mli:type typed_ast = (tannot, env) ast *)
+let process_ast (env: Env.t) (output_chan: out_channel) (ast: typed_ast) =
   print_endline "Generating XDSL...";
   begin
     match ast with
-      {defs = d; comments = _} -> process_def_list output_chan d;
+      {defs = d; comments = _} -> process_def_list env output_chan d;
   end

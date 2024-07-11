@@ -41,7 +41,7 @@ let xdsl_rewrites =
 let xdsl_target out_file { ast; effect_info; env; _ } =
   let close, output_chan = match out_file with Some f -> (true, open_out (f ^ ".c")) | None -> (false, stdout) in
   Reporting.opt_warnings := true;
-  Xdsl_backend.process_ast output_chan ast;
+  Xdsl_backend.process_ast env output_chan ast;
   flush output_chan;
   if close then close_out output_chan
 
