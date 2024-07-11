@@ -15,6 +15,26 @@ open Anf
 
 module Big_int = Nat_big_num
 
+let string_of_id id = match id with
+    Id_aux(Id(id),_) -> id
+  | Id_aux(Operator(_),_) -> assert(false)
+
+let process_dec_spec env output reg = match reg with
+    Typ_aux(Typ_id(id),_) ->
+     let sid = string_of_id id in
+     print_string(": " ^ sid);
+  | Typ_aux(Typ_var(kid),_) -> ()
+  | Typ_aux(Typ_app(id,typ_list),_) ->
+     let sid = string_of_id id in
+     print_endline(": " ^ sid);
+     assert(false)
+  | Typ_aux(Typ_fn(id_in,typ_list),_) -> ()
+  | Typ_aux(Typ_bidir(typ1,typ2),_) -> ()
+  | Typ_aux(Typ_tuple(typ_list),_) -> ()
+  | Typ_aux(Typ_exist(kinded_id_list,typ0,typ1),_) -> ()
+  | Typ_aux(Typ_internal_unknown,_) -> ()
+
+
 let process_def_aux env output_chan def_aux = match def_aux with
     DEF_type(type_def) -> ()
   | DEF_constraint(atyp) -> ()
@@ -31,7 +51,12 @@ let process_def_aux env output_chan def_aux = match def_aux with
   | DEF_scattered(scattered_def) -> () (* scattered definition *)
   | DEF_measure(id,pat,exp) -> () (* separate termination measure declaration *)
   | DEF_loop_measures(id,loop_measure_list) -> () (* separate termination measure declaration *)
-  | DEF_register(dec_spec) -> () (* register declaration *)
+  (* register declaration *)
+  | DEF_register(DEC_aux(DEC_reg(reg,id,opt),_)) ->
+     let sid = string_of_id id in
+     print_string("register " ^ sid);
+     process_dec_spec env output reg;
+     print_endline("");
   | DEF_pragma(string0,string1,int) -> ()
   (* | DEF_private(def) -> () *)
   (* | DEF_attribute(string,attribute_data,option_def) -> () *)
