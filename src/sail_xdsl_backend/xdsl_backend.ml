@@ -20,8 +20,8 @@ let string_of_id id = match id with
   | Id_aux(Operator(_),_) -> assert(false)
 
 let string_of_nexp_aux nexp_aux = match nexp_aux with
-    Nexp_id(id) -> assert(false)
-  | Nexp_var(kid) -> assert(false)
+    Nexp_id(id) -> string_of_id id
+  | Nexp_var(Kid_aux(Var(v),_)) -> v
   | Nexp_constant(num) -> Nat_big_num.to_string(num)
   | Nexp_app(id,nexp_list) -> assert(false)
   | Nexp_if(n_constraint,nexp0,nexp1) -> assert(false)
@@ -72,9 +72,20 @@ and process_typ_args env (A_aux (typ_arg_aux, _)) = match typ_arg_aux with
        | NC_true -> assert(false)
        | NC_false -> assert(false)
      end
+let rec process_typ_def_aux env typ_def_aux = match typ_def_aux with
+    TD_abbrev(id,typquant,typ_arg) ->
+     let string_id = string_of_id id in
+     let string_typ_arg = process_typ_args env typ_arg in
+     "type " ^ string_id ^ ": " ^ string_typ_arg
+  | TD_record(id,typquant,typ_id_list,bool) -> assert(false)
+  | TD_variant(id,typquant,type_union_list,bool) -> ""
+  | TD_enum(id, id_list ,bool) -> assert(false)
+  | TD_abstract(id,kind) -> assert(false)
+  | TD_bitfield(id,typ, id_index_range_list) -> assert(false)
 
 let process_def_aux env output_chan (DEF_aux(aux,_)) = match aux with
-    DEF_type(type_def) -> ()
+    DEF_type(TD_aux(typ_def_aux,_)) -> let def = process_typ_def_aux env typ_def_aux in
+                                       output_string output_chan (def^"\n");
   | DEF_constraint(atyp) -> ()
   | DEF_fundef(fundef) -> ()
   | DEF_mapdef(mapdef) -> () (* mapping definition *)
