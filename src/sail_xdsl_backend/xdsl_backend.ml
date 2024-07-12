@@ -31,14 +31,14 @@ let string_of_nexp_aux nexp_aux = match nexp_aux with
   | Nexp_exp(nexp) -> assert(false)
   | Nexp_neg(nexp) -> assert(false)
 
-let rec process_dec_spec env output (Typ_aux(reg,_)) = match reg with
+let rec process_dec_spec env (Typ_aux(reg,_)) = match reg with
     Typ_id(id) ->
      let sid = string_of_id id in
      sid
   | Typ_var(kid) -> assert(false)
   | Typ_app(id,typ_arg_list) ->
      let sid = string_of_id id in
-     let string_typ_arg_list = List.map (process_typ_args env output) typ_arg_list in
+     let string_typ_arg_list = List.map (process_typ_args env) typ_arg_list in
      let h,t = List.hd string_typ_arg_list, List.tl string_typ_arg_list in
      let string_typ_args = h ^ (List.fold_left (fun acc x -> acc^","^x) "" t) in
      sid ^ "(" ^ string_typ_args ^ ")"
@@ -47,13 +47,13 @@ let rec process_dec_spec env output (Typ_aux(reg,_)) = match reg with
   | Typ_tuple(typ_list) -> assert(false)
   | Typ_exist(kinded_id_list,typ0,typ1) -> assert(false)
   | Typ_internal_unknown -> assert(false)
-and process_typ_args env output (A_aux (typ_arg_aux, _)) = match typ_arg_aux with
+and process_typ_args env (A_aux (typ_arg_aux, _)) = match typ_arg_aux with
     A_nexp n ->
      begin
        match n with
          Nexp_aux(nexp_aux0,nexp_aux1) -> string_of_nexp_aux nexp_aux0
      end
-  | A_typ(t) -> process_dec_spec env output t
+  | A_typ(t) -> process_dec_spec env t
   | A_bool(NC_aux(nca,_)) ->
      begin
        match nca with
@@ -73,44 +73,31 @@ and process_typ_args env output (A_aux (typ_arg_aux, _)) = match typ_arg_aux wit
        | NC_false -> assert(false)
      end
 
-let process_def_aux env output_chan def_aux = match def_aux with
-    DEF_type(type_def) -> ""
-  | DEF_constraint(atyp) -> ""
-  | DEF_fundef(fundef) -> ""
-  | DEF_mapdef(mapdef) -> "" (* mapping definition *)
-  | DEF_impl(funcl) -> "" (* impl definition *)
-  | DEF_let(letbind) -> "" (* value definition *)
-  | DEF_overload(id,id_list) -> "" (* operator overload specifications *)
-  | DEF_fixity(prec,num,id) -> "" (* fixity declaration *)
-  | DEF_val(val_spec) -> "" (* top-level type constraint *)
-  | DEF_outcome(outcome_spec,def_list) -> "" (* top-level outcome definition *)
-  | DEF_instantiation(id,subst_list) -> "" (* instantiation *)
-  | DEF_default(default_typing_spec) -> "" (* default kind and type assumptions *)
-  | DEF_scattered(scattered_def) -> "" (* scattered definition *)
-  | DEF_measure(id,pat,exp) -> "" (* separate termination measure declaration *)
-  | DEF_loop_measures(id,loop_measure_list) -> "" (* separate termination measure declaration *)
-  (* register declaration *)
-  | DEF_register(DEC_aux(DEC_reg(reg,id,opt),_)) ->
+let process_def_aux env output_chan (DEF_aux(aux,_)) = match aux with
+    DEF_type(type_def) -> ()
+  | DEF_constraint(atyp) -> ()
+  | DEF_fundef(fundef) -> ()
+  | DEF_mapdef(mapdef) -> () (* mapping definition *)
+  | DEF_impl(funcl) -> () (* impl definition *)
+  | DEF_let(letbind) -> () (* value definition *)
+  | DEF_overload(id,id_list) -> () (* operator overload specifications *)
+  | DEF_fixity(prec,num,id) -> () (* fixity declaration *)
+  | DEF_val(val_spec) -> () (* top-level type constraint *)
+  | DEF_outcome(outcome_spec,def_list) -> () (* top-level outcome definition *)
+  | DEF_instantiation(id,subst_list) -> () (* instantiation *)
+  | DEF_default(default_typing_spec) -> () (* default kind and type assumptions *)
+  | DEF_scattered(scattered_def) -> () (* scattered definition *)
+  | DEF_measure(id,pat,exp) -> () (* separate termination measure declaration *)
+  | DEF_loop_measures(id,loop_measure_list) -> () (* separate termination measure declaration *)
+  | DEF_register(DEC_aux(DEC_reg(reg,id,opt),_)) -> (* register declaration *)
      let string_id = string_of_id id in
-     let string_register_definition = process_dec_spec env output reg in
-     "register " ^ string_id ^ ": " ^ string_register_definition
-  | DEF_pragma(string0,string1,int) -> ""
-  (* | DEF_private(def) -> "" *)
-  (* | DEF_attribute(string,attribute_data,option_def) -> "" *)
-  (* | DEF_doc(string, def) -> "" *)
-  | DEF_internal_mutrec(fundef_list) -> ""
-
-let rec process_def_list env output_chan def_list = match def_list with
-    [] -> ""
-  | DEF_aux(aux,_) :: t -> (match process_def_aux env output_chan aux with
-                              "" -> process_def_list env output_chan t
-                            | s -> s ^ "\n" ^ process_def_list env output_chan t)
+     let string_register_definition = process_dec_spec env reg in
+     let def = "register " ^ string_id ^ ": " ^ string_register_definition ^ "\n" in
+     output_string output_chan def;
+  | DEF_pragma(string0,string1,int) -> ()
+  | DEF_internal_mutrec(fundef_list) -> ()
 
 (* Env: ~/src/upstream/sail/src/lib/type_env.ml *)
 (* Ast: ./src/lib/type_check.mli:type typed_ast = (tannot, env) ast *)
-let process_ast (env: Env.t) (output_chan: out_channel) (ast: typed_ast) =
-  print_endline "Generating XDSL...";
-  begin
-    match ast with
-      {defs = d; comments = _} -> print_string(process_def_list env output_chan d);
-  end
+let process_ast (env: Env.t) (o: out_channel) ({defs = d; comments = _}: typed_ast) =
+  List.iter (process_def_aux env o) d;
